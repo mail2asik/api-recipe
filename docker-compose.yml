@@ -9,8 +9,8 @@ services:
         container_name: recipe-nginx
         restart: unless-stopped
         ports:
-            - "81:80"
-            - "444:443"
+            - "82:80"
+            - "446:443"
         volumes:
             - ./src/nginx:/var/www/public
             - ./volume/config/nginx/conf.d/local:/etc/nginx/conf.d
@@ -27,7 +27,7 @@ services:
         container_name: recipe-php
         restart: unless-stopped
         ports:
-            - "9001:9000"
+            - "9002:9000"
         volumes:
             - ./src/php:/var/www
             - ./volume/config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
@@ -40,7 +40,7 @@ services:
         container_name: recipe-mysql
         restart: unless-stopped
         ports:
-            - "4307:3306"
+            - "4308:3306"
         environment:
             MYSQL_ROOT_PASSWORD: rootPassword@1
             MYSQL_DATABASE: recipe
@@ -58,7 +58,7 @@ services:
         container_name: recipe-memcached
         restart: unless-stopped
         ports:
-            - '11213:11211'
+            - '11214:11211'
         networks:
             - recipe-network
 
@@ -68,7 +68,7 @@ services:
         container_name: recipe-redis
         restart: unless-stopped
         ports:
-            - '${FORWARD_REDIS_PORT:-6380}:6379'
+            - '${FORWARD_REDIS_PORT:-6381}:6379'
         volumes:
             - ./volume/data/redis:/data
         networks:
