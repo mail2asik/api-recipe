@@ -64,6 +64,25 @@ class AuthController extends Controller
     }
 
     /**
+     * @param $email
+     * @param $token
+     * @return mixed
+     */
+    public function activateByUrl($email, $token)
+    {
+        try {
+            $result = $this->authRepository->activateAccount([
+                "email" => $email,
+                "token" => $token
+            ]);
+
+            return Response::api($result, 'Activated');
+        } catch (\Exception $e) {
+            return Response::error('Failed to activate account', $e->getMessage(), $e->getCode(), 400);
+        }
+    }
+
+    /**
      * @param Request $request
      * @return Response
      */

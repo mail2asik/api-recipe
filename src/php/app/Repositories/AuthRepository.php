@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 
 use App\Exceptions\AuthenticationException;
+use App\Exceptions\UserException;
 use App\Models\User;
 use App\Notifications\ActivateAccount;
 
@@ -103,6 +104,10 @@ class AuthRepository
                 throw new AuthenticationException("An email password combination might be incorrect");
             }
 
+            if (empty($user->email_verified_at)) {
+                throw new AuthenticationException("Your account has not been activated. Please check your email to activate the account");
+            }
+
             if ($user->status != config('constants.user_statuses')['approved']) {
                 switch ($user->status) {
                     case config('constants.user_statuses')['pending']:
@@ -136,6 +141,48 @@ class AuthRepository
         } catch (\Exception $e) {
             Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
                 'Unknown Exception thrown AuthRepository@login', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw new AuthenticationException($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * @param $params
+     * @return array
+     * @throws AuthenticationException
+     */
+    public function activateAccount($params)
+    {
+        try {
+            $user = User::where('email', $params['email'])->where('activation_token', $params['token'])->first();
+            if (!$user) {
+                throw new UserException("Activation code is invalid.");
+            }
+
+            $user->email_verified_at = Carbon::now();
+            $user->activation_token = null;
+            $user->status = config('constants.user_statuses')['approved'];
+            $user->save();
+
+            return $user;
+        } catch (UserException $e) {
+            Log::debug(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'UserException thrown AuthRepository@activateAccount', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw new AuthenticationException($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown AuthRepository@activateAccount', [
                 'exception_type' => get_class($e),
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
