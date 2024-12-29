@@ -32,6 +32,7 @@ services:
             - ./src/php:/var/www
             - ./volume/config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
             - ./volume/config/laravel/env/local/.env:/var/www/.env
+            - ./volume/logs/laravel:/var/www/storage/logs
         networks:
             - recipe-network
 

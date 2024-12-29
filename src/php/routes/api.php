@@ -1,12 +1,38 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return ['Laravel' => app()->version()];
-});
+use App\Http\Controllers\Api\PingController;
+use App\Http\Controllers\Api\AuthController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
+
+Route::group(['domain' => config('constants.domain_api')], function () {
+
+    Route::controller(PingController::class)->group(function () {
+        Route::get('/ping', 'index');
+    });
+
+    // Auth Controller
+    Route::prefix('auth')->group(function () {
+        Route::controller(AuthController::class)->group(function () {
+            Route::post('register', 'register');
+            Route::post('login', 'login');
+
+
+            Route::middleware('auth:sanctum')->group(function () {
+                Route::post('logout', 'logout');
+            });
+        });
+    });
+
+});
