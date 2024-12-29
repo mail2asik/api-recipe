@@ -362,4 +362,31 @@ class AuthRepository
             throw new \Exception($e->getMessage(), $e->getCode());
         }
     }
+
+    /**
+     * @param $user
+     * @return mixed
+     * @throws AuthenticationException
+     */
+    public function refreshToken($user)
+    {
+        try {
+            $user->currentAccessToken()->delete();
+
+            return [
+                "token" => $user->createToken('auth_token')->plainTextToken
+            ];
+
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown AuthRepository@refreshToken', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw new AuthenticationException($e->getMessage(), $e->getCode());
+        }
+    }
 }

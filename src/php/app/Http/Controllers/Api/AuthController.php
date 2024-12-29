@@ -144,4 +144,19 @@ class AuthController extends Controller
             return Response::error('Failed to password changed', $e->getMessage(), $e->getCode(), 400);
         }
     }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public function refreshToken(Request $request)
+    {
+        try {
+            $result = $this->authRepository->refreshToken($request->user());
+
+            return Response::api($result, 'RefreshToken');
+        } catch (\Exception $e) {
+            return Response::error('Failed to refresh token', $e->getMessage(), $e->getCode(), 400);
+        }
+    }
 }
