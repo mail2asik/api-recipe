@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\PingController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,14 @@ Route::group(['domain' => config('constants.domain_api')], function () {
                 Route::post('refresh-token', 'refreshToken');
                 Route::post('logout', 'logout');
             });
+        });
+    });
+
+    // User Controller
+    Route::prefix('user')->middleware('auth:sanctum')->group(function () {
+        Route::controller(UserController::class)->group(function () {
+            Route::get('/', 'show');
+            Route::put('/', 'update');
         });
     });
 
