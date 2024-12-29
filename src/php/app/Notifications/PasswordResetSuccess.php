@@ -6,12 +6,14 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ActivateAccount extends Notification
+class PasswordResetSuccess extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -37,16 +39,10 @@ class ActivateAccount extends Notification
      */
     public function toMail($notifiable)
     {
-        $mail = (new MailMessage)
-                    ->subject('Confirm your account')
-                    ->line('Thanks for signup! Please before you begin, you must confirm your account.');
-
-        $url = config('constants.domain_web') . '/auth/activate/' . $notifiable->email . '/' . $notifiable->activation_token;
-        $mail = $mail->action('Confirm Account', $url);
-
-        $mail = $mail->line('Thank you for using our application!');
-
-        return $mail;
+        return (new MailMessage)
+                    ->line('You are changed your password successful.')
+                    ->line('If you did change password, no further action is required.')
+                    ->line('If you did not change password, protect your account.');
     }
 
     /**

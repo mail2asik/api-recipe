@@ -6,16 +6,27 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ActivateAccount extends Notification
+class PasswordResetRequest extends Notification
 {
     use Queueable;
 
+    protected $email;
+
+    protected $token;
+
+    protected $client;
+
+    protected $is_admin;
+
     /**
      * Create a new notification instance.
+     *
+     * @param $token
+     * @return void
      */
-    public function __construct()
+    public function __construct($token)
     {
-        //
+        $this->token = $token;
     }
 
     /**
@@ -38,13 +49,12 @@ class ActivateAccount extends Notification
     public function toMail($notifiable)
     {
         $mail = (new MailMessage)
-                    ->subject('Confirm your account')
-                    ->line('Thanks for signup! Please before you begin, you must confirm your account.');
+                    ->line('You are receiving this email because we received a password reset request for your account.');
 
-        $url = config('constants.domain_web') . '/auth/activate/' . $notifiable->email . '/' . $notifiable->activation_token;
-        $mail = $mail->action('Confirm Account', $url);
+        $url = config('constants.domain_web') . '/auth/reset-password/' .$notifiable->email . '/' . $this->token;
+        $mail = $mail->action('Reset Password', $url);
 
-        $mail = $mail->line('Thank you for using our application!');
+        $mail = $mail->line('If you did not request a password reset, no further action is required.');
 
         return $mail;
     }

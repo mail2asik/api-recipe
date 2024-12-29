@@ -17,7 +17,10 @@ use Illuminate\Support\Facades\Hash;
 use App\Exceptions\AuthenticationException;
 use App\Exceptions\UserException;
 use App\Models\User;
+use App\Models\PasswordReset;
 use App\Notifications\ActivateAccount;
+use App\Notifications\PasswordResetRequest;
+use App\Notifications\PasswordResetSuccess;
 
 class AuthRepository
 {
@@ -191,5 +194,128 @@ class AuthRepository
             ]);
             throw new AuthenticationException($e->getMessage(), $e->getCode());
         }
+    }
+
+    /**
+     * @param $params
+     * @return bool
+     * @throws AuthenticationException
+     */
+    public function passwordReminder($params)
+    {
+        try {
+            $user = User::where('email', $params['email'])->first();
+            if (empty($user)) {
+                throw new UserException('Account does not exist');
+            }
+
+            $passwordReset = PasswordReset::updateOrCreate(
+                ['email' => $params['email']],
+                [
+                    'email' => $params['email'],
+                    'token' => (string) Str::random(60)
+                ]
+            );
+
+        } catch (UserException $e) {
+            Log::debug(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'UserException thrown AuthRepository@passwordReminder', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw new AuthenticationException($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown AuthRepository@passwordReminder', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw new AuthenticationException($e->getMessage(), $e->getCode());
+        }
+
+        try {
+            if ($passwordReset) {
+                $user->notify(new PasswordResetRequest($passwordReset->token));
+            }
+        } catch (\Exception $e) {
+            // Don't log if any error from mailgun
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $params
+     * @return bool
+     * @throws AuthenticationException
+     */
+    public function passwordReset($params)
+    {
+        try {
+            $passwordReset = PasswordReset::where([
+                ['token', $params['token']],
+                ['email', $params['email']]
+            ])->first();
+            if (empty($passwordReset)) {
+                throw new AuthenticationException('Expired or invalid activation code');
+            }
+
+            $user = User::where('email', $params['email'])->first();
+            if (empty($user)) {
+                throw new UserException('User not found');
+            }
+
+            $user->password = Hash::make($params['password']);
+            $user->save();
+
+            $passwordReset->delete();
+
+        } catch (AuthenticationException $e) {
+            Log::debug(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'AuthenticationException thrown AuthRepository@passwordReset', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw $e;
+        } catch (UserException $e) {
+            Log::debug(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'UserException thrown AuthRepository@passwordReset', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw new AuthenticationException($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown AuthRepository@passwordReset', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw new AuthenticationException($e->getMessage(), $e->getCode());
+        }
+
+        $user->tokens()->delete();
+
+        try {
+            $user->notify(new PasswordResetSuccess(false));
+        } catch (\Exception $e) {
+            // Don't log if any error from mailgun
+        }
+
+        return true;
     }
 }

@@ -26,8 +26,12 @@ Route::group(['domain' => config('constants.domain_api')], function () {
     Route::prefix('auth')->group(function () {
         Route::controller(AuthController::class)->group(function () {
             Route::post('register', 'register');
-            Route::post('login', 'login');
             Route::post('activate-by-url/{email}/{token}', 'activateByUrl');
+            Route::post('login', 'login');
+            
+
+            Route::post('password-reminder', 'passwordReminder');
+            Route::post('password-reset', 'passwordReset');
 
 
             Route::middleware('auth:sanctum')->group(function () {
