@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Redis;
 
 use App\Http\Controllers\Api\PingController;
 use App\Http\Controllers\Api\AuthController;
@@ -21,6 +22,14 @@ Route::group(['domain' => config('constants.domain_api')], function () {
 
     Route::controller(PingController::class)->group(function () {
         Route::get('/ping', 'index');
+    });
+
+    Route::get('/test-redis-publish', function () {
+        Redis::publish('test-redis-channel', json_encode([
+            'name' => 'Hello World'
+        ]));
+
+        return ['Laravel' => app()->version()];
     });
 
     // Auth Controller
