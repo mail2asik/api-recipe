@@ -16,11 +16,4 @@ return [
         'suspended'     => 'suspended',
     ],
 
-    'static_otp' => env('STATIC_OTP', false),
-
-    'device_types' => [
-        'android' => 'android',
-        'ios' => 'ios'
-    ]
-
 ];
