@@ -318,4 +318,48 @@ class AuthRepository
 
         return true;
     }
+
+    /**
+     * Change password
+     *
+     * @param array $params
+     * @param $user
+     * @return void
+     * @throws \Exception
+     */
+    public function passwordChange($params, $user)
+    {
+        try {
+            $params['email'] = $user->email;
+
+            $user = User::where('email',  $params['email'])->first();
+            if (!$user || !Hash::check($params['password'], $user->password)) 
+            {
+                throw new AuthenticationException("Your current password might be incorrect");
+            }
+
+            $user->password = Hash::make($params['new_password']);
+            $user->save();
+        } catch (AuthenticationException $e) {
+            Log::debug(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'AuthenticationException thrown AuthRepository@passwordChange', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown AuthRepository@passwordChange', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw new \Exception($e->getMessage(), $e->getCode());
+        }
+    }
 }

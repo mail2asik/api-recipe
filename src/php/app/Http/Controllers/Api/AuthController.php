@@ -16,6 +16,7 @@ use App\Http\Requests\AuthRegisterRequest;
 use App\Http\Requests\AuthLoginRequest;
 use App\Http\Requests\AuthPasswordReminderRequest;
 use App\Http\Requests\AuthPasswordResetRequest;
+use App\Http\Requests\AuthPasswordChangeRequest;
 
 use App\Repositories\AuthRepository;
 
@@ -126,6 +127,21 @@ class AuthController extends Controller
             return Response::api($result, 'PasswordReset');
         } catch (\Exception $e) {
             return Response::error('Failed to password reset', $e->getMessage(), $e->getCode(), 400);
+        }
+    }
+
+    /**
+     * @param AuthPasswordChangeRequest $request
+     * @return mixed
+     */
+    public function passwordChange(AuthPasswordChangeRequest $request)
+    {
+        try {
+            $this->authRepository->passwordChange($request->all(), $request->user());
+
+            return Response::api(true, 'PasswordChange');
+        } catch (\Exception $e) {
+            return Response::error('Failed to password changed', $e->getMessage(), $e->getCode(), 400);
         }
     }
 }

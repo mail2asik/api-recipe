@@ -35,6 +35,7 @@ Route::group(['domain' => config('constants.domain_api')], function () {
 
 
             Route::middleware('auth:sanctum')->group(function () {
+                Route::post('password-change', 'passwordChange');
                 Route::post('logout', 'logout');
             });
         });
