@@ -32,7 +32,9 @@ services:
             - ./src/php:/var/www
             - ./volume/config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
             - ./volume/config/laravel/env/local/.env:/var/www/.env
+            - ./volume/config/laravel/supervisor/local/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
             - ./volume/logs/laravel:/var/www/storage/logs
+        command: supervisord -c /etc/supervisor/conf.d/supervisord.conf
         networks:
             - recipe-network
 

@@ -25,3 +25,5 @@ yarn-error.log
 /node/node_modules
 .directory
 deploy/*.retry
+supervisord.log
+supervisord.pid

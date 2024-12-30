@@ -20,7 +20,8 @@ RUN apt-get update && apt-get install -y \
     vim \
     unzip \
     git \
-    curl
+    curl \
+    supervisor
 
 # Install Memcached
 RUN apt-get install -y libmemcached-dev
@@ -56,7 +57,7 @@ COPY . /var/www
 RUN rm -rf vendor
 
 # Install application required packages
-RUN composer install
+RUN composer install --no-dev --optimize-autoloader
 
 # Copy existing application directory permissions
 COPY --chown=www:www . /var/www
@@ -65,7 +66,7 @@ COPY --chown=www:www . /var/www
 USER www
 
 # Expose port. this is not required if we manage from docker-compose
-EXPOSE 80
+EXPOSE 9000
 
 # Start php-fpm server
 CMD ["php-fpm"]

@@ -4,19 +4,14 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class PasswordResetRequest extends Notification
+class PasswordResetRequest extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    protected $email;
-
     protected $token;
-
-    protected $client;
-
-    protected $is_admin;
 
     /**
      * Create a new notification instance.
