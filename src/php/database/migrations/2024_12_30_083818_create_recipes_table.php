@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('ingredients')->nullable();
             $table->text('short_desc')->nullable();
             $table->text('long_desc')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
 
             $table->timestamps();
             $table->softDeletes();

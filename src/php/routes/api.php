@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Redis;
 use App\Http\Controllers\Api\PingController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\RecipeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,17 @@ Route::group(['domain' => config('constants.domain_api')], function () {
         Route::controller(UserController::class)->group(function () {
             Route::get('/', 'show');
             Route::put('/', 'update');
+        });
+    });
+
+    // Recipe Controller
+    Route::prefix('recipe')->middleware('auth:sanctum')->group(function () {
+        Route::controller(RecipeController::class)->group(function () {
+            Route::post('/', 'store');
+            Route::get('/', 'index');
+            Route::get('/{recipe_uid}', 'show');
+            Route::put('/{recipe_uid}', 'update');
+            Route::delete('/{recipe_uid}', 'destroy');
         });
     });
 
