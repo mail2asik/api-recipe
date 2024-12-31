@@ -28,6 +28,7 @@ class StoreRecipeRequest extends ApiFormRequest
         return [
             'category' => 'required',
             'title' => 'required|min:10',
+            'image' => 'image|mimes:jpeg,png,jpg,gif|dimensions:min_width=160,min_height=160',
             'ingredients' => 'required|min:10',
             'short_desc' => 'required|min:10',
             'long_desc' => 'required|min:20'

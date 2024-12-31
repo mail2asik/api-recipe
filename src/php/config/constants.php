@@ -27,4 +27,11 @@ return [
         'rejected'      => 'rejected',
     ],
 
+    's3_default_recipe_image_name' => 'default.jpg', 
+
+    's3_dir' => [
+        'original' => 'common/images/original',
+        'thumb' => 'common/images/thumb'
+    ]
+
 ];

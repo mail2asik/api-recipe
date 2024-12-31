@@ -31,7 +31,7 @@ class RecipeSeeder extends Seeder
 
     protected function createRecipe($param)
     {
-        $recipe = $this->recipeRepository->create($param, $user_id = 1);
+        $recipe = $this->recipeRepository->create($param, $user_id = 1, $request = null);
 
         // Approve immediately
         $recipe->status = config('constants.recipe_statuses')['approved'];

@@ -72,7 +72,7 @@ class RecipeController extends Controller
     public function store(StoreRecipeRequest $request)
     {
         try {
-            $result = $this->recipeRepository->create($request->all(), $request->user()->id);
+            $result = $this->recipeRepository->create($request->except('image'), $request->user()->id, $request);
             return Response::api($result, 'Created');
         } catch (\Exception $e) {
             return Response::error('Failed to create recipe', $e->getMessage(), $e->getCode(), 400);
