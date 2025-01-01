@@ -95,10 +95,11 @@ class AuthRepository
 
     /**
      * @param $params
+     * @param $is_admin
      * @return array
      * @throws AuthenticationException
      */
-    public function login($params)
+    public function login($params, $is_admin = false)
     {
         try {
             $user = User::where('email',  $params['email'])->first();
@@ -129,8 +130,9 @@ class AuthRepository
 
             return [
                 'user' => $user,
-                'token' => $user->createToken('auth_token')->plainTextToken
+                'token' => (!$is_admin) ? $user->createToken('auth_token')->plainTextToken : '' 
             ];
+
         } catch (AuthenticationException $e) {
             Log::debug(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
                 'AuthenticationException thrown AuthRepository@login', [
@@ -387,6 +389,34 @@ class AuthRepository
                 'params' => func_get_args()
             ]);
             throw new AuthenticationException($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * Admin Profile update
+     *
+     * @param array $params
+     * @param $user
+     * @return User
+     * @throws \Exception
+     */
+    public function adminProfileUpdate($params, $user)
+    {
+        try {
+            $user->name = $params['name'];
+            $user->save();
+
+            return $user;
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown AuthRepository@adminProfileUpdate', [
+                'exception_type' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line_no' => $e->getLine(),
+                'params' => func_get_args()
+            ]);
+            throw new \Exception($e->getMessage(), $e->getCode());
         }
     }
 }

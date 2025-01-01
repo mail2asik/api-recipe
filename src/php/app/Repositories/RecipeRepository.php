@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 use App\Exceptions\RecipeException;
 use App\Models\Recipe;
@@ -30,7 +31,7 @@ class RecipeRepository
     }
 
     /**
-     * Get a businesses
+     * Get a recipes
      * @param array $params
      * @param $user_id
      * @return array (Recipe)
@@ -67,6 +68,37 @@ class RecipeRepository
         }
     }
 
+    /**
+     * Get a recipes by Admin
+     * @param array $params
+     * @return array (Recipe)
+     * @throws RecipeException
+     */
+    public function getRecipesByAdmin($params)
+    {
+        try {
+            $recipes = $this->getModel()->select('recipes.*', 'users.email')
+            ->join('users', 'recipes.user_id', '=', 'users.id');
+
+            if (!empty($params['search_by_keywords'])) {
+                $recipes = $recipes->where('recipes.title', 'like', '%'.$params['search_by_keywords'].'%');
+            }
+
+            return $recipes->orderBy('recipes.id', 'desc')->paginate($params['limit'])->toArray();
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown RecipeRepository@getRecipesByAdmin', [
+                'exception_type' => get_class($e),
+                'message'        => $e->getMessage(),
+                'code'           => $e->getCode(),
+                'line_no'        => $e->getLine(),
+                'params'         => func_get_args()
+            ]);
+
+            throw new RecipeException($e->getMessage(), $e->getCode());
+        }
+    }
+
      /**
      * Create a recipe
      * @param $params
@@ -82,7 +114,7 @@ class RecipeRepository
 
             $recipe->uid = (string) Str::uuid();
             $recipe->user_id = $user_id;
-            $recipe->category = in_array($params['category'], config('constants.recipe_category')) ? $params['category'] : config('constants.recipe_category')['veg'];
+            $recipe->category = in_array($params['category'], config('constants.recipe_categories')) ? $params['category'] : config('constants.recipe_categories')['veg'];
             $recipe->title = $params['title'];
             $recipe->slug = Str::slug($params['title']);
             $recipe->image_uid = '';
@@ -127,13 +159,20 @@ class RecipeRepository
      * Get a recipe by uid
      * @param $recipe_uid
      * @param $user_id
+     * @param $is_admin
      * @return Recipe
      * @throws RecipeException
      */
-    public function getRecipeByUid($recipe_uid, $user_id)
+    public function getRecipeByUid($recipe_uid, $user_id, $is_admin = false)
     {
         try {
-            $recipe = $this->getModel()->where('user_id', $user_id)->where('uid', $recipe_uid)->first();
+            $recipe = $this->getModel();
+
+            if (!$is_admin) {
+                $recipe = $recipe->where('user_id', $user_id);
+            }
+
+            $recipe = $recipe->where('uid', $recipe_uid)->first();
 
             if (empty($recipe)) {
                 throw new RecipeException('Recipe not found');
@@ -271,6 +310,98 @@ class RecipeRepository
             ]);
 
             return '';
+        }
+    }
+
+    /**
+     * Get total number of users
+     *
+     * @param $status
+     * @return integer
+     */
+    public function getTotalNumberOfRecipes($status = '')
+    {
+        $recipes = DB::table('recipes')
+            ->select(DB::raw('COUNT(recipes.id) as `count`'));
+
+        switch ($status) {
+            case config('constants.recipe_statuses')['approved']:
+                $recipes = $recipes->where('status', config('constants.recipe_statuses')['approved']);
+                break;
+            case config('constants.recipe_statuses')['pending']:
+                $recipes = $recipes->where('status', config('constants.recipe_statuses')['pending']);
+                break;
+            case config('constants.recipe_statuses')['rejected']:
+                $recipes = $recipes->where('status', config('constants.recipe_statuses')['rejected']);
+                break;
+        }
+
+        $recipes = $recipes->first();
+
+        return $recipes->count;
+    }
+
+    /**
+     * Reject a recipe
+     *
+     * @param $recipe_uid
+     * @return bool
+     * @throws RecipeException
+     */
+    public function rejectRecipe($recipe_uid)
+    {
+        try {
+            $recipe = $this->getRecipeByUid($recipe_uid, $user_id= '', $is_admin = true);
+
+            $recipe->status = config('constants.recipe_statuses')['rejected'];
+
+            $recipe->save();
+
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown RecipeRepository@rejectRecipe', [
+                'exception_type' => get_class($e),
+                'message'        => $e->getMessage(),
+                'code'           => $e->getCode(),
+                'line_no'        => $e->getLine(),
+                'params'         => func_get_args()
+            ]);
+
+            throw new RecipeException($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * Approve a recipe
+     *
+     * @param $recipe_uid
+     * @return bool
+     * @throws UserException
+     */
+    public function approveRecipe($recipe_uid)
+    {
+        try {
+            $recipe = $this->getRecipeByUid($recipe_uid, $user_id= '', $is_admin = true);
+
+            $recipe->status = config('constants.recipe_statuses')['approved'];
+
+            $recipe->save();
+
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown RecipeRepository@approveRecipe', [
+                'exception_type' => get_class($e),
+                'message'        => $e->getMessage(),
+                'code'           => $e->getCode(),
+                'line_no'        => $e->getLine(),
+                'params'         => func_get_args()
+            ]);
+
+            throw new RecipeException($e->getMessage(), $e->getCode());
         }
     }
 }

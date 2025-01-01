@@ -6,6 +6,7 @@ return [
     'domain_admin' => "admin.recipe.local",
 
     'roles'  => [
+        'admin'  => 'admin',
         'user'   => 'user'
     ],
 
@@ -16,7 +17,7 @@ return [
         'suspended'     => 'suspended',
     ],
 
-    'recipe_category'  => [
+    'recipe_categories'  => [
         'veg'   => 'veg',
         'non_veg'   => 'non_veg'
     ],
