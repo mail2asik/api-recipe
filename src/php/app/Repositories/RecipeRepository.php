@@ -40,7 +40,7 @@ class RecipeRepository
     public function getRecipes($params, $user_id)
     {
         try {
-            $recipes = $this->getModel()->select('uid', 'image_uid', 'category', 'title', 'created_at', 'updated_at')->where('user_id', $user_id);
+            $recipes = $this->getModel()->select('uid', 'image_uid', 'category', 'title', 'created_at', 'updated_at', 'status')->where('user_id', $user_id);
 
             if (!empty($params['search_by_keywords'])) {
                 $recipes = $recipes->where('title', 'like', '%'.$params['search_by_keywords'].'%');
@@ -394,6 +394,81 @@ class RecipeRepository
         } catch (\Exception $e) {
             Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
                 'Unknown Exception thrown RecipeRepository@approveRecipe', [
+                'exception_type' => get_class($e),
+                'message'        => $e->getMessage(),
+                'code'           => $e->getCode(),
+                'line_no'        => $e->getLine(),
+                'params'         => func_get_args()
+            ]);
+
+            throw new RecipeException($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * Get a recent recipes
+     * @param $count
+     * @return array (Recipe)
+     * @throws RecipeException
+     */
+    public function getRecentRecipes($count)
+    {
+        try {
+            $recipes = $this->getModel()
+            ->select('uid', 'image_uid', 'title', 'created_at')
+            ->where('status', config('constants.recipe_statuses')['approved'])
+            ->limit($count)
+            ->orderBy('id', 'desc')
+            ->get();
+
+            if (count($recipes) === 0) {
+                return [];
+            }
+
+            return $recipes->toArray();
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown RecipeRepository@getRecentRecipes', [
+                'exception_type' => get_class($e),
+                'message'        => $e->getMessage(),
+                'code'           => $e->getCode(),
+                'line_no'        => $e->getLine(),
+                'params'         => func_get_args()
+            ]);
+
+            throw new RecipeException($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * Get all recipes
+     * @param array $params
+     * @return array (Recipe)
+     * @throws RecipeException
+     */
+    public function getAllRecipes($params)
+    {
+        try {
+            $recipes = $this->getModel()
+            ->select('uid', 'image_uid', 'title', 'created_at')
+            ->where('status', config('constants.recipe_statuses')['approved'])
+            ->orderBy('id', 'desc');
+
+            if (!empty($params['search_by_keywords'])) {
+                $recipes = $recipes->where('title', 'like', '%'.$params['search_by_keywords'].'%');
+            }
+
+            $recipes = $recipes->skip(($params['page'] - 1) * $params['limit'])
+                ->take($params['limit'])
+                ->get();
+            if (count($recipes) === 0) {
+                return [];
+            }
+
+            return $recipes->toArray();
+        } catch (\Exception $e) {
+            Log::error(__CLASS__ . ':' . __TRAIT__ . ':' . __FILE__ . ':' . __LINE__ . ':' . __FUNCTION__ . ':' .
+                'Unknown Exception thrown RecipeRepository@getAllRecipes', [
                 'exception_type' => get_class($e),
                 'message'        => $e->getMessage(),
                 'code'           => $e->getCode(),

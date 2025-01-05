@@ -126,4 +126,59 @@ class RecipeController extends Controller
             return Response::error('Failed to delete recipe', $e->getMessage(), $e->getCode(), 400);
         }
     }
+
+    /**
+     * Display the recent 4 recipes.
+     * @return mixed
+     */
+    public function recent()
+    {
+        try {
+            $result = $this->recipeRepository->getRecentRecipes($count = 4);
+            return Response::api($result, 'Displayed');
+        } catch (\Exception $e) {
+            return Response::error('Failed to list recent 4 recipes', $e->getMessage(), $e->getCode(), 400);
+        }
+    }
+
+    /**
+     * Display a listing of all recipe from all users.
+     * @param Request $request
+     * @return array
+     */
+    public function all(Request $request)
+    {
+        try {
+            $params['search_by_keywords'] = rawurldecode($request->get('search_by_keywords', ''));
+            $params['page']               = $request->get('page', 1);
+            $params['limit']              = $request->get('limit', 10);
+
+            $allowed_params = [5, 10, 25, 50, 100];
+            if (!in_array($params['limit'], $allowed_params)) {
+                $params['limit'] = 25;
+            }
+
+            if ($params['page'] != 1 && !filter_var($params['page'], FILTER_VALIDATE_INT)) {
+                $params['page'] = 1;
+            }
+
+            $data = $this->recipeRepository->getAllRecipes($params);
+
+            $results = [
+                'per_page'      => $params['limit'],
+                'current_page'  => $params['page'],
+                'data'          => $data,
+                'next_page_url' => false
+            ];
+
+            if (count($data) == $params['limit']) {
+                $params['page'] += 1;
+                $results['next_page_url'] = $request->url() . '?' . http_build_query($params);
+            }
+
+            return Response::api($results, 'Listed');
+        } catch (\Exception $e) {
+            return Response::error('Failed to list all recipes', $e->getMessage(), $e->getCode(), 400);
+        }
+    }
 }

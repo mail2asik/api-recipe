@@ -61,8 +61,13 @@ Route::group(['domain' => config('constants.domain_api')], function () {
     });
 
     // Recipe Controller
-    Route::prefix('recipe')->middleware('auth:sanctum')->group(function () {
+    Route::prefix('recipe')->group(function () {
         Route::controller(RecipeController::class)->group(function () {
+            Route::get('/recent', 'recent');
+            Route::get('/all', 'all');
+        });
+        
+        Route::middleware('auth:sanctum')->controller(RecipeController::class)->group(function () {
             Route::post('/', 'store');
             Route::get('/', 'index');
             Route::get('/{recipe_uid}', 'show');
