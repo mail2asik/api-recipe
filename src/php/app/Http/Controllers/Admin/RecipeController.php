@@ -72,7 +72,7 @@ class RecipeController extends Controller
     public function view($recipe_uid)
     {
         try {
-            $recipe = $this->recipeRepository->getRecipeByUid($recipe_uid, $user_id = '', $is_admin = true);
+            $recipe = $this->recipeRepository->getRecipeByUid($recipe_uid);
 
             return view('admin.recipe.view',[
                 'page_title' => 'View Recipe',

@@ -159,17 +159,21 @@ class RecipeRepository
      * Get a recipe by uid
      * @param $recipe_uid
      * @param $user_id
-     * @param $is_admin
+     * @param $status
      * @return Recipe
      * @throws RecipeException
      */
-    public function getRecipeByUid($recipe_uid, $user_id, $is_admin = false)
+    public function getRecipeByUid($recipe_uid, $user_id = false, $status = false)
     {
         try {
             $recipe = $this->getModel();
 
-            if (!$is_admin) {
+            if ($user_id) {
                 $recipe = $recipe->where('user_id', $user_id);
+            }
+
+            if ($status) {
+                $recipe = $recipe->where('status', $status);
             }
 
             $recipe = $recipe->where('uid', $recipe_uid)->first();

@@ -65,6 +65,7 @@ Route::group(['domain' => config('constants.domain_api')], function () {
         Route::controller(RecipeController::class)->group(function () {
             Route::get('/recent', 'recent');
             Route::get('/all', 'all');
+            Route::get('/view/{recipe_uid}', 'view');
         });
         
         Route::middleware('auth:sanctum')->controller(RecipeController::class)->group(function () {

@@ -181,4 +181,19 @@ class RecipeController extends Controller
             return Response::error('Failed to list all recipes', $e->getMessage(), $e->getCode(), 400);
         }
     }
+
+    /**
+     * View the specified recipe by public
+     * @param $recipe_uid
+     * @return mixed
+     */
+    public function view($recipe_uid)
+    {
+        try {
+            $result = $this->recipeRepository->getRecipeByUid($recipe_uid, $user_id = false, $status = config('constants.recipe_statuses')['approved']);
+            return Response::api($result, 'Displayed');
+        } catch (\Exception $e) {
+            return Response::error('Failed to view recipe', $e->getMessage(), $e->getCode(), 400);
+        }
+    }
 }
