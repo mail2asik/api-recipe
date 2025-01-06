@@ -16,7 +16,10 @@ use Illuminate\Support\Facades\DB;
 
 use App\Exceptions\RecipeException;
 use App\Models\Recipe;
+use App\Models\User;
 use App\Repositories\Traits\ModelTrait;
+use App\Notifications\AdminApprovedRecipe;
+use App\Notifications\AdminRejectedRecipe;
 
 class RecipeRepository
 {
@@ -257,6 +260,15 @@ class RecipeRepository
         try {
             $recipe = $this->getRecipeByUid($recipe_uid, $user_id);
 
+            // Delete images in S3
+            if (!empty($recipe->image_uid)) {
+                $s3_dir = config('constants.s3_dir');
+                $image_name = $recipe->image_uid . '.jpg';
+                Storage::disk('s3')->delete($s3_dir['original'] . '/' . $image_name);
+                Storage::disk('s3')->delete($s3_dir['thumb'] . '/' . $image_name);
+            }
+
+
             $recipe->delete();
 
             return true;
@@ -355,11 +367,17 @@ class RecipeRepository
     public function rejectRecipe($recipe_uid)
     {
         try {
-            $recipe = $this->getRecipeByUid($recipe_uid, $user_id= '', $is_admin = true);
-
+            $recipe = $this->getRecipeByUid($recipe_uid);
             $recipe->status = config('constants.recipe_statuses')['rejected'];
-
             $recipe->save();
+
+            // Notification email to user
+            if (!empty($recipe->user_id)) {
+                $user = User::where('id', $recipe->user_id)->first();
+                if (!empty($user)) {
+                    $user->notify(new AdminRejectedRecipe($recipe ->uid, $recipe ->title));
+                }
+            }
 
             return true;
 
@@ -387,11 +405,17 @@ class RecipeRepository
     public function approveRecipe($recipe_uid)
     {
         try {
-            $recipe = $this->getRecipeByUid($recipe_uid, $user_id= '', $is_admin = true);
-
+            $recipe = $this->getRecipeByUid($recipe_uid);
             $recipe->status = config('constants.recipe_statuses')['approved'];
-
             $recipe->save();
+
+            // Notification email to user
+            if (!empty($recipe->user_id)) {
+                $user = User::where('id', $recipe->user_id)->first();
+                if (!empty($user)) {
+                    $user->notify(new AdminApprovedRecipe($recipe ->uid, $recipe ->title));
+                }
+            }
 
             return true;
 

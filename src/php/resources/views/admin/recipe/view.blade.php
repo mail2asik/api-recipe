@@ -15,6 +15,12 @@
                     <label>Recipe Title</label>
                     <strong class="form-control autoHeight">{{$recipe->title}}</strong>
                 </div>
+                <div class="form-group">
+                    <label>Recipe Photo</label>
+                    <div>
+                        <img src="{{$recipe->image_url['thumb']}}" />
+                    </div>
+                </div>
             </div>
         </div>
 

@@ -35,7 +35,7 @@
 
     <li class="nav-item @if($page_name == 'recipes') active @endif">
         <a class="nav-link" href="{{ secure_url('recipe') }}">
-            <i class="fas fa-fw fa-files"></i>
+            <i class="fas fa-fw fa-file-invoice"></i>
             <span>Recipes</span></a>
     </li>
 
