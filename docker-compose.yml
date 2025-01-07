@@ -15,8 +15,6 @@ services:
             - ./src/nginx:/var/www/public
             - ./volume/config/nginx/conf.d/local:/etc/nginx/conf.d
             - ./volume/config/nginx/ssl/local:/etc/nginx/ssl
-        networks:
-            - recipe-network
 
     #PHP Service
     recipe-php:
@@ -35,13 +33,11 @@ services:
             - ./volume/config/laravel/supervisor/local/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
             - ./volume/logs/laravel:/var/www/storage/logs
         command: supervisord -c /etc/supervisor/conf.d/supervisord.conf
-        networks:
-            - recipe-network
-
+ 
     #MySQL Service
-    recipe-mysql:
+    mysql:
         image: mysql:5.7.32
-        container_name: recipe-mysql
+        container_name: mysql
         restart: unless-stopped
         ports:
             - "4308:3306"
@@ -53,33 +49,22 @@ services:
         volumes:
             - ./volume/config/mysql/my.cnf:/etc/mysql/my.cnf
             - ./volume/data/mysql:/var/lib/mysql
-        networks:
-            - recipe-network
 
     #Memcached Service
     recipe-memcached:
         image: memcached:1.6.17-alpine
-        container_name: recipe-memcached
+        container_name: memcached
         restart: unless-stopped
         ports:
             - '11214:11211'
-        networks:
-            - recipe-network
-
+ 
     #Redis Service
     recipe-redis:
         image: redis:6.2.6-alpine
-        container_name: recipe-redis
+        container_name: redis
         restart: unless-stopped
         ports:
             - '${FORWARD_REDIS_PORT:-6381}:6379'
         volumes:
             - ./volume/data/redis:/data
-        networks:
-            - recipe-network
 
-#Docker Networks
-networks:
-    recipe-network:
-         name: recipe-network
-         external: true
