@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'domain_web' => "https://recipe.local:446",
-    'domain_api' => "api.recipe.local",
-    'domain_admin' => "admin.recipe.local",
+    'domain_web' => env('DOMAIN_WEB', 'https://recipe.local:446'),
+    'domain_api' => env('DOMAIN_API', 'api.recipe.local'),
+    'domain_admin' => env('DOMAIN_ADMIN', 'admin.recipe.local'),
 
     'roles'  => [
         'admin'  => 'admin',
