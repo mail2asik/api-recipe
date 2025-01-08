@@ -1,5 +1,7 @@
 # API for Recipe Web Application Using Laravel Framework (Back End)
 
+This project details the API architecture for the Recipe Web Application, which is built using the Laravel framework. The back end of the application offers a robust, secure, and efficient interface for managing recipes, user authentication, and administrative tasks.
+
 This Recipe application is designed with a stateless architecture and provides a RESTful API secured with token-based authentication. The API is consumed by a  [front-end application](https://github.com/mail2asik/web-recipe) built using React libraries.
 
 ## Technical Implementation
