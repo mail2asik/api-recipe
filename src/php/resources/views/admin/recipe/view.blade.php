@@ -31,15 +31,15 @@
             <div class="card-body">
                 <div class="form-group">
                     <label>Ingredients</label>
-                    <strong class="form-control autoHeight">{{$recipe->ingredients}}</strong>
+                    <strong class="form-control h-auto">{!! nl2br($recipe->ingredients) !!}</strong>
                 </div>
                 <div class="form-group">
                     <label>Short Description</label>
-                    <label class="form-control autoHeight">{{$recipe->short_desc}}</label>
+                    <label class="form-control h-auto">{!! nl2br($recipe->short_desc) !!}</label>
                 </div>
                 <div class="form-group">
                     <label>Long Description</label>
-                    <label class="form-control autoHeight">{{$recipe->long_desc}}</label>
+                    <label class="form-control h-auto">{!! nl2br($recipe->long_desc) !!}</label>
                 </div>
             </div>
         </div>
