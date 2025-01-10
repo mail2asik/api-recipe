@@ -78,3 +78,13 @@ GET|HEAD  api.recipe.local/api/recipe/{recipe_uid}
 PUT       api.recipe.local/api/recipe/{recipe_uid} 
 
 DELETE    api.recipe.local/api/recipe/{recipe_uid}
+
+## TODO
+- Implement pagination for public recipes list.
+
+- Implement pagination for users' recipes list.
+- Write test cases using Jest.
+- Refresh authentication token at regular intervals for security reasons.
+- Handle errors to display multiple error messages from the API.
+- Use FontAwesome React components instead of CDN.
+- Separate form handling logic into components to improve code readability.
